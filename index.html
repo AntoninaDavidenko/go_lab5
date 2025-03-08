@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор енергосистем</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h1 class="mb-4">Лабораторна робота 5</h1>
+                        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link {{if eq .ActiveTab " task1"}}active{{end}}" data-bs-toggle="tab"
+                                    href="#task1">Завдання 1</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{if eq .ActiveTab " task2"}}active{{end}}" data-bs-toggle="tab"
+                                    href="#task2">Завдання 2</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <!-- Task 1 -->
+                            <div class="tab-pane fade {{if eq .ActiveTab " task1"}}show active{{end}}" id="task1">
+                                <form method="post">
+                                    <input type="hidden" name="task" value="1">
+                                    <input type="hidden" name="activeTab" value="task1">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Лінія електропередач:</label>
+                                        <select class="form-select" name="powerLine" required>
+                                            {{range $index, $element := .PowerLines}}
+                                            <option value="{{$index}}">{{$element.Name}}</option>
+                                            {{end}}
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Довжина ліній електропередач, км:</label>
+                                        <input type="number" step="0.01" class="form-control" name="powerLineLength"
+                                            required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Вимикач:</label>
+                                        <select class="form-select" name="switch" required>
+                                            {{range $index, $element := .Switches}}
+                                            <option value="{{$index}}">{{$element.Name}}</option>
+                                            {{end}}
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Трансформатор:</label>
+                                        <select class="form-select" name="transformer" required>
+                                            {{range $index, $element := .Transformers}}
+                                            <option value="{{$index}}">{{$element.Name}}</option>
+                                            {{end}}
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Кількість приєднань 10 кВ:</label>
+                                        <input type="number" step="0.01" class="form-control" name="accession" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Кількість ввідних вимикачів 10 кВ:</label>
+                                        <input type="number" step="0.01" class="form-control" name="switchCount"
+                                            required>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Розрахувати</button>
+                                </form>
+
+                                {{if .Task1Result}}
+                                <div class="mt-4">
+                                    <h2 class="h4 mb-3">Результати розрахунку:</h2>
+                                    <div class="alert alert-info">
+                                        <p>Частота відмов одноколової системи: {{printf "%.3f" .Result.WOC}} рік⁻¹</p>
+                                        <p>Середня тривалість відновлення: {{printf "%.3f" .Result.TWOC}} год.</p>
+                                        <p>Коефіцієнт аварійного простою одноколової системи: {{printf "%.6f"
+                                            .Result.KAOC}}</p>
+                                        <p>Коефіцієнт планового простою одноколової системи: {{printf "%.6f"
+                                            .Result.KPOC}}</p>
+                                        <p>Частота відмов одночасно двох кіл двоколової системи: {{printf "%.6f"
+                                            .Result.WDK}} рік⁻¹</p>
+                                        <p>Частота відмов двоколової системи з урахуванням секційного вимикача: {{printf
+                                            "%.6f" .Result.WDC}} рік⁻¹</p>
+
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+
+                            <!-- Task 2 -->
+                            <div class="tab-pane fade {{if eq .ActiveTab " task2"}}show active{{end}}" id="task2">
+                                <form method="post">
+                                    <input type="hidden" name="task" value="2">
+                                    <input type="hidden" name="activeTab" value="task2">
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Збитки у разі аварійних вимкнень:</label>
+                                        <input type="number" step="0.01" class="form-control" name="emergencyLosses"
+                                            required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Збитки у разі планових вимкнень:</label>
+                                        <input type="number" step="0.01" class="form-control" name="plannedLosses"
+                                            required>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary">Розрахувати</button>
+                                </form>
+
+                                {{if .Task2Result}}
+                                <div class="mt-4">
+                                    <h2 class="h4 mb-3">Результати розрахунку:</h2>
+                                    <div class="alert alert-info">
+                                        <p>Математичне сподівання збитків від переривання електропостачання: {{printf
+                                            "%.2f" .Result.MLosses}} грн.</p>
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var activeTab = '{{.ActiveTab}}';
+            if (activeTab) {
+                var tab = document.querySelector('a[href="#' + activeTab + '"]');
+                if (tab) {
+                    new bootstrap.Tab(tab).show();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
